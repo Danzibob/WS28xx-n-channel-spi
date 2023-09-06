@@ -1,4 +1,4 @@
-//! Module with all code + comments related to timing. The WS2818 has specific restrictions
+//! Module with all code + comments related to timing. The WS28XX has specific restrictions
 //! how long high and low signal must be send on DIN-wire in nanoseconds. All logic and constants
 //! needed to cope with this are placed here.
 //!
@@ -48,15 +48,15 @@ pub mod encoding {
     /// How many SPI bytes must be send for a single data bit.
     /// This number of bytes result in one logical zero or one
     /// on WS2818 LED.
-    pub const SPI_BYTES_PER_DATA_BIT: usize = 2;
+    pub const SPI_BYTES_PER_BIT: usize = 2;
 
     /// See code comments above where this value comes from!
     /// These are the bits to send via SPI MOSI that represent a logical 0
     /// on WS2812 RGB LED interface. Frequency + length results in the proper timings.
-    pub const WS2812_LOGICAL_ZERO_BYTES: [u8; SPI_BYTES_PER_DATA_BIT] = [0b1111_1000, 0b0000_0000];
+    pub const WS_ZERO_BYTES: [u8; SPI_BYTES_PER_BIT] = [0b1111_1000, 0b0000_0000];
 
     /// See code comments above where this value comes from!
     /// These are the bits to send via SPI MOSI that represent a logical 1
     /// on WS2812 RGB LED interface. Frequency + length results in the proper timings.
-    pub const WS2812_LOGICAL_ONE_BYTES: [u8; SPI_BYTES_PER_DATA_BIT] = [0b1111_1111, 0b1000_0000];
+    pub const WS_ONE_BYTES: [u8; SPI_BYTES_PER_BIT] = [0b1111_1111, 0b1000_0000];
 }

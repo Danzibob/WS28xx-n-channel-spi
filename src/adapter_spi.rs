@@ -1,10 +1,8 @@
 //! Adapter for SPI-dev on Linux-systems. This requires std.
 
 use crate::adapter_gen::{HardwareDev, WS28xxAdapter, WS28xxGenAdapter};
-use crate::encoding::encode_rgb_slice;
 use crate::timings::PI_SPI_HZ;
 use alloc::boxed::Box;
-use alloc::fmt::format;
 use alloc::string::{String, ToString};
 use spidev::{SpiModeFlags, Spidev, SpidevOptions};
 use std::io;
@@ -15,7 +13,8 @@ struct SpiHwAdapterDev(Spidev);
 
 // Implement Hardwareabstraction for device.
 impl HardwareDev for SpiHwAdapterDev {
-    fn write_all(&mut self, encoded_data: &[u8]) -> Result<(), String> {
+    type Error = String;
+    fn write_all(&mut self, encoded_data: &[u8]) -> Result<(), Self::Error> {
         self.0.write_all(&encoded_data)
             .map_err(|_| {
                 format!(
@@ -72,7 +71,7 @@ impl WS28xxSpiAdapter {
 }
 
 impl WS28xxAdapter for WS28xxSpiAdapter {
-    fn get_hw_dev(&mut self) -> &mut Box<dyn HardwareDev> {
+    fn get_hw_dev(&mut self) -> &mut Box<dyn HardwareDev<Error=String>> {
         // forward to generic adapter
         // todo this is not the best code design because this requires
         //  each sub adapter (like a sub class in OOP) to implement
