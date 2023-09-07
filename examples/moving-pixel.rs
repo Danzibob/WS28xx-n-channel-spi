@@ -2,59 +2,37 @@
 //! Make sure you have "SPI" on your Pi enabled and that MOSI-Pin is connected
 //! with DIN-Pin. You just need DIN pin, no clock. WS2818 uses one-wire-protocol.
 //! See the specification for details
-
-use ws28xx_n_channel_spi::adapter_gen::WS28xxAdapter;
-use ws28xx_n_channel_spi::adapter_spi::WS28xxSpiAdapter;
-use ws28xx_n_channel_spi::encoding::encode_slice;
-
+use ws28xx_n_channel_spi::generic_adapter::*;
+use ws28xx_n_channel_spi::linux_spi::LinuxSPI;
 use std::time::{Duration, Instant};
 
-// Example that shows a single moving pixel though the 8x8 led matrix.
+// 3 channels per module is a standard RGB setup
+const CHANNELS_PER_MODULE : usize = 3;
+// Number of modules
+const NUM_MODULES : usize = 64;
+// Using 64 LEDs for an 8x8 grid as a demonstration
+const NUM_LEDS : usize = NUM_MODULES * CHANNELS_PER_MODULE;
+
+// Example that shows a single moving pixel though an RGB 8x8 led matrix.
 fn main() {
-    println!("make sure you have \"SPI\" on your Pi enabled and that MOSI-Pin is connected with DIN-Pin!");
-    let mut adapter = WS28xxSpiAdapter::new("/dev/spidev0.0").unwrap();
-    let num_leds = get_led_num_from_args();
+    // Create the linux SPI device adapter
+    let hw_adapter : LinuxSPI = LinuxSPI::new("/dev/spidev0.0").unwrap();
+    // Create an LED strip with 
+    let mut strip : LEDs<NUM_LEDS, CHANNELS_PER_MODULE, LinuxSPI> = LEDs::new(hw_adapter);
 
-    // note we first aggregate all data and write then all at
-    // once! otherwise timings would be impossiframe_delayble to reach
+    // Colour order is GRB for standard NeoPixels
+    const PURPLE: [u8;3] = [0, 50, 30];
+    const OFF: [u8;3] = [0, 0, 0];
 
-    let mut i = 0;
+    let mut i: usize = 0;
     loop {
-        let mut data = vec![];
-        for j in 0..num_leds {
-            // fill num_leds-1 pixels with black; one with white
-            if i == j {
-                data.extend_from_slice(&encode_slice(&[50, 50, 50]));
-            } else {
-                data.extend_from_slice(&encode_slice(&[0, 0, 0]));
-            }
-        }
-        adapter.write_encoded_slice(&data).unwrap();
+        strip.set_node(i, OFF);
+        strip.set_node(i+1, PURPLE);
+        let _ = strip.write();
 
-        i = (i + 1) % num_leds;
+        i = (i + 1) % (NUM_MODULES-1);
         sleep_busy_waiting_ms(100);
     }
-}
-
-
-/// Returns n from args or default.
-pub fn get_led_num_from_args() -> usize {
-    println!(
-        "You can provide the number of LEDs as argument when calling from command line.\
-        For example \"cargo run --bin <bin> 64\". The default is 64."
-    );
-    let args = std::env::args().collect::<Vec<String>>();
-    if args.len() > 1 {
-        let leds = args[1].parse::<usize>();
-        if let Result::Ok(leds) = leds {
-            println!("Using {} LEDs", leds);
-            return leds;
-        }
-    }
-
-    // Default
-    println!("Using 64 LEDs");
-    64
 }
 
 #[inline(always)]

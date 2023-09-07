@@ -11,9 +11,8 @@ keywords = ["spi", "ws2811", "ws2812", "ws2818", "neopixel"]
 categories = ["hardware-support"]
 readme = "README.md"
 license = "MIT"
-homepage = "https://github.com/phip1611/ws2818-rgb-led-spi-driver"
-repository = "https://github.com/phip1611/ws2818-rgb-led-spi-driver"
-documentation = "https://docs.rs/ws2818-rgb-led-spi-driver/"
+homepage = "https://github.com/Danzibob/WS28xx-n-channel-spi/"
+repository = "https://github.com/Danzibob/WS28xx-n-channel-spi/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
