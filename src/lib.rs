@@ -1,7 +1,11 @@
-//! The main goal of this crate was to work on Raspberry Pi. As the title says, this is bound
-//! to `spi`-device for sending data. But you can use it also on other systems, i.e. embedded systems
-//! (no_std-environments) but in these cases you must provide an own `encoding.rs` file if the
-//! refresh rate doesn't match the value in [`timings::PI_SPI_HZ`].
+//! This crate is intended to fill a nice of having an arbitraty number of colour channels
+//! per node in a WS28xx setup. Previous crates focus on RGB and RGBW specifically, but
+//! this crate allows for an arbitrary number of channels using generics.
+//! 
+//! Through the use of a [`generic_adapter::GenericHardware`] trait, different methods
+//! of driving the LEDs may be implemented. This library comes with an SPI bit-banging
+//! implementation for the raspberry pi, but because the main library is `no-std` compatible,
+//! alternate hardware implementations should be possible across any platform.
 
 #![no_std]
 
@@ -15,6 +19,6 @@ pub mod generic_adapter; // generic [no_std] hardware abstraction
 #[cfg(feature = "adapter_spidev")]
 pub mod linux_spi; // specific [std]-implementation
 
-// bound to Raspberry Pi SPI device but you can easily provide your own
-// encoding functions.
+// Raspberry Pi SPI device
+// you can easily provide your own encoding functions.
 pub mod linux_spi_encoding;

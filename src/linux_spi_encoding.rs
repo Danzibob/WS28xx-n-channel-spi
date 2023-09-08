@@ -12,6 +12,7 @@
 //!
 //! See device specification for further details.
 
+
 /// The frequency for the SPI device that should be used. While this was developed I focused
 /// on Raspberry Pi. Works on other Linux systems with SPI device probably too if they have
 /// a similar frequency. Otherwise you may need to change the values in `encoding.rs`.
@@ -101,8 +102,3 @@ pub fn encode_node<const N: usize>(node: &Node<N>) -> [u8;N*SPI_BYTES_PER_PX]{
     }
     output
 }
-
-// /// Encodes multiple Nodes in a slice. Uses [`encode_pixel`] for each value.
-// pub fn encode_slice<const N: usize>(pixels: &[Node<N>]) -> Vec<u8>{
-//     pixels.iter().flat_map(encode_pixel).collect()
-// }

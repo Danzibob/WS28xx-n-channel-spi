@@ -4,20 +4,17 @@ use crate::linux_spi_encoding::*;
 use spidev::{SpiModeFlags, Spidev, SpidevOptions};
 use crate::std::io;
 use crate::std::io::Write;
-use std::vec;
-use std::vec::Vec;
 
 /// Wrapper around Spidev.
-pub struct LinuxSPI{
+pub struct LinuxSPI<const B: usize> where [u8; B*SPI_BYTES_PER_BIT*BITS_PER_PX]:{
     spi: Spidev,
-    buffer: Vec<u8>
+    buffer: [u8; B*SPI_BYTES_PER_BIT*BITS_PER_PX]
 }
 
 // Implement Hardware abstraction for device.
-impl GenericHardware for LinuxSPI{
-    fn init(&mut self, num_leds: usize){
-        let size = num_leds * SPI_BYTES_PER_BIT * BITS_PER_PX;
-        self.buffer = vec![0; size];
+impl<const B: usize> GenericHardware<B> for LinuxSPI<B> where [u8; B*SPI_BYTES_PER_BIT*BITS_PER_PX]:{
+    fn init(&mut self){
+        self.buffer = [0; B*SPI_BYTES_PER_BIT*BITS_PER_PX];
     }
     fn write_raw(&mut self, encoded_data: &[u8]) -> Result<(), HardwareError> {
         self.spi.write_all(&encoded_data)
@@ -25,22 +22,17 @@ impl GenericHardware for LinuxSPI{
     }
 
     fn encode_and_write(&mut self, node_data: &[u8]) -> Result<(), HardwareError>{
-        let mut buffer_idx = 0;
-        for px in node_data{
-            let encoded_byte = encode_pixel(px);
-            for byte in encoded_byte{
-                self.buffer[buffer_idx] = byte;
-                buffer_idx += 1;
-            }
+        for (i,byte) in node_data.iter().flat_map(encode_pixel).enumerate(){
+            self.buffer[i] = byte;
         }
-        self.buffer = node_data.iter().flat_map(encode_pixel).collect();
         self.spi.write_all(&self.buffer)
             .map_err(|_| HardwareError::WriteError(self.buffer.len()) )
     }
 }
 
-impl LinuxSPI {
+impl<const B: usize> LinuxSPI<B> where [u8; B*SPI_BYTES_PER_BIT*BITS_PER_PX]:{
     /// Connects your application with the SPI-device of your device.
+    /// 
     /// This uses the `spidev`-crate. Returns a new adapter object
     /// for the WS28xx LEDs.
     ///
@@ -57,7 +49,7 @@ impl LinuxSPI {
         spi.configure(&options)?;
         Ok(Self{
             spi,
-            buffer: Vec::new()
+            buffer: [0; B*SPI_BYTES_PER_BIT*BITS_PER_PX]
         })
     }
 }
