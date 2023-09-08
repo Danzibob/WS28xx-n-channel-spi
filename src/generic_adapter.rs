@@ -1,17 +1,17 @@
 //! Generic Hardware Abstraction Layer, no_std-compatible.
 
-/// Custom error type to return errors without strings
-#[derive(Debug)]
 pub enum HardwareError {
-    WriteError(usize)
+    IoError,
+    // Add more error types here as needed
 }
 
 /// Hardware device abstraction, which can be implemented
 /// by many different types of back-end (embedded, linux, etc.)
 pub trait GenericHardware<const B: usize> {
+    type Error;
     fn init(&mut self);
-    fn write_raw(&mut self, byte_array: &[u8]) -> Result<(), HardwareError>;
-    fn encode_and_write(&mut self, byte_array: &[u8]) -> Result<(), HardwareError>;
+    fn write_raw(&mut self, byte_array: &[u8]) -> Result<(), Self::Error>;
+    fn encode_and_write(&mut self, byte_array: &[u8]) -> Result<(), Self::Error>;
 }
 
 
@@ -47,7 +47,7 @@ impl<const N: usize, const M: usize, H: GenericHardware<N>> LEDs<N, M, H> {
     }
 
     /// Writes the currently stored buffer
-    pub fn write(&mut self) -> Result<(), HardwareError> {
+    pub fn write(&mut self) -> Result<(), H::Error> {
         self.hw_dev.encode_and_write(&self.leds)
     }
 }

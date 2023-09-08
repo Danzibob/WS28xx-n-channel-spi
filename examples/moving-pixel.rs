@@ -2,6 +2,10 @@
 //! Make sure you have "SPI" on your Pi enabled and that MOSI-Pin is connected
 //! with DIN-Pin. You just need DIN pin, no clock. WS2818 uses one-wire-protocol.
 //! See the specification for details
+
+#![allow(incomplete_features)]
+#![feature(generic_const_exprs)]
+
 use ws28xx_n_channel_spi::generic_adapter::*;
 use ws28xx_n_channel_spi::linux_spi::LinuxSPI;
 use std::time::{Duration, Instant};

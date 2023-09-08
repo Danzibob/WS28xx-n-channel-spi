@@ -13,20 +13,20 @@ pub struct LinuxSPI<const B: usize> where [u8; B*SPI_BYTES_PER_BIT*BITS_PER_PX]:
 
 // Implement Hardware abstraction for device.
 impl<const B: usize> GenericHardware<B> for LinuxSPI<B> where [u8; B*SPI_BYTES_PER_BIT*BITS_PER_PX]:{
+    type Error = std::io::Error;
+
     fn init(&mut self){
         self.buffer = [0; B*SPI_BYTES_PER_BIT*BITS_PER_PX];
     }
-    fn write_raw(&mut self, encoded_data: &[u8]) -> Result<(), HardwareError> {
+    fn write_raw(&mut self, encoded_data: &[u8]) -> Result<(), Self::Error> {
         self.spi.write_all(&encoded_data)
-            .map_err(|_| HardwareError::WriteError(encoded_data.len()) )
     }
 
-    fn encode_and_write(&mut self, node_data: &[u8]) -> Result<(), HardwareError>{
+    fn encode_and_write(&mut self, node_data: &[u8]) -> Result<(), Self::Error>{
         for (i,byte) in node_data.iter().flat_map(encode_pixel).enumerate(){
             self.buffer[i] = byte;
         }
         self.spi.write_all(&self.buffer)
-            .map_err(|_| HardwareError::WriteError(self.buffer.len()) )
     }
 }
 
