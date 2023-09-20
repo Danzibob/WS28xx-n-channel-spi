@@ -9,7 +9,7 @@
 #![feature(generic_const_exprs)]
 
 use std::time::{Duration, Instant};
-use ws28xx_n_channel_spi::linux_spi::LinuxSPI;
+use ws28xx_n_channel_spi::pi_spi::LinuxSPI;
 use ws28xx_n_channel_spi::LEDs;
 
 // 3 channels per module is a standard RGB setup

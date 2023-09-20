@@ -14,11 +14,7 @@
 #[cfg(feature = "adapter_spidev")]
 extern crate std;
 #[cfg(feature = "adapter_spidev")]
-pub mod linux_spi; // specific [std]-implementation
-
-// Raspberry Pi SPI device
-// you can easily provide your own encoding functions.
-pub mod linux_spi_encoding;
+pub mod pi_spi; // specific [std]-implementation
 
 /// Hardware device abstraction, which can be implemented by many different types of back-end (embedded, linux, etc.)
 pub trait GenericHardware<const B: usize> {
