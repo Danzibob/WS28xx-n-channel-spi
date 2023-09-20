@@ -23,9 +23,6 @@ where
 {
     type Error = std::io::Error;
 
-    fn init(&mut self) {
-        self.buffer = [0; B * SPI_BYTES_PER_BIT * BITS_PER_PX];
-    }
     fn write_raw(&mut self, encoded_data: &[u8]) -> Result<(), Self::Error> {
         self.spi.write_all(&encoded_data)
     }

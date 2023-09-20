@@ -24,9 +24,6 @@ pub mod linux_spi_encoding;
 pub trait GenericHardware<const B: usize> {
     type Error;
 
-    /// Initialise the device.
-    fn init(&mut self);
-
     /// Sequentially write `byte_array` exactly as presented.
     fn write_raw(&mut self, byte_array: &[u8]) -> Result<(), Self::Error>;
 
@@ -52,11 +49,10 @@ pub struct LEDs<const N: usize, const M: usize, H: GenericHardware<N>> {
 
 impl<const N: usize, const M: usize, H: GenericHardware<N>> LEDs<N, M, H> {
     /// Constructor to initialise LEDs struct
-    pub fn new(mut hardware_device: H) -> Self {
-        hardware_device.init();
+    pub fn new(hw_dev: H) -> Self {
         Self {
             leds: [0; N],
-            hw_dev: hardware_device,
+            hw_dev,
         }
     }
 
