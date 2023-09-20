@@ -22,7 +22,19 @@ pub mod linux_spi; // specific [std]-implementation
 // you can easily provide your own encoding functions.
 pub mod linux_spi_encoding;
 
-use generic_adapter::GenericHardware;
+/// Hardware device abstraction, which can be implemented by many different types of back-end (embedded, linux, etc.)
+pub trait GenericHardware<const B: usize> {
+    type Error;
+
+    /// Initialise the device.
+    fn init(&mut self);
+
+    /// Sequentially write `byte_array` exactly as presented.
+    fn write_raw(&mut self, byte_array: &[u8]) -> Result<(), Self::Error>;
+
+    /// Encode `byte_array` suitable for WS81XX bitbanging, then write it.
+    fn encode_and_write(&mut self, byte_array: &[u8]) -> Result<(), Self::Error>;
+}
 
 /// Struct that contains a buffer of indiviual LED values (bytes)
 ///
