@@ -13,8 +13,6 @@
 
 #[cfg(feature = "adapter_spidev")]
 extern crate std;
-
-pub mod generic_adapter; // generic [no_std] hardware abstraction
 #[cfg(feature = "adapter_spidev")]
 pub mod linux_spi; // specific [std]-implementation
 

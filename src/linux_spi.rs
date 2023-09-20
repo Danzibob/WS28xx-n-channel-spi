@@ -1,10 +1,10 @@
 //! Adapter for SPI-dev on Linux-systems.
 //!
 //! This requires std.
-use crate::generic_adapter::*;
 use crate::linux_spi_encoding::*;
 use crate::std::io;
 use crate::std::io::Write;
+use crate::GenericHardware;
 use spidev::{SpiModeFlags, Spidev, SpidevOptions};
 
 /// Wrapper around Spidev.
