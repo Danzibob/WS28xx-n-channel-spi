@@ -19,24 +19,5 @@ fn main(){
     // Create an LED strip with 
     let mut strip : LEDs<NUM_LEDS, CHANNELS_PER_MODULE, _> = LEDs::new(hw_adapter);
 
-    // Colour order is GRB for standard NeoPixels
-    const PURPLE: [u8;3] = [0, 50, 30];
-    const OFF: [u8;3] = [0, 0, 0];
-
-    let mut i: usize = 0;
-    loop {
-
-        // Try to run at 60fps
-        let next_frame = Instant::now() + Duration::from_millis(16);
-
-        strip.set_node(i, OFF);
-
-        i = (i + 1) % (NUM_MODULES);
-
-        strip.set_node(i, PURPLE);
-
-        strip.write().unwrap();
-
-        while Instant::now() < next_frame {}
-    }
+    strip.write().unwrap();
 }

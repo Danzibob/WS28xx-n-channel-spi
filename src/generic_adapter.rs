@@ -1,5 +1,5 @@
 //! Generic Hardware Abstraction Layer, no_std-compatible.
-
+#[derive(Debug)]
 pub enum HardwareError {
     IoError,
     // Add more error types here as needed

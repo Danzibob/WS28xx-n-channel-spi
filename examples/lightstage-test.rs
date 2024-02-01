@@ -6,9 +6,9 @@ use ws28xx_n_channel_spi::linux_spi::LinuxSPI;
 use std::time::{Duration, Instant};
 
 // 3 channels per module is a standard RGB setup
-const CHANNELS_PER_MODULE : usize = 3;
+const CHANNELS_PER_MODULE : usize = 9;
 // Number of modules
-const NUM_MODULES : usize = 64;
+const NUM_MODULES : usize = 143;
 // Using 64 LEDs for an 8x8 grid as a demonstration
 const NUM_LEDS : usize = NUM_MODULES * CHANNELS_PER_MODULE;
 
@@ -20,14 +20,14 @@ fn main(){
     let mut strip : LEDs<NUM_LEDS, CHANNELS_PER_MODULE, _> = LEDs::new(hw_adapter);
 
     // Colour order is GRB for standard NeoPixels
-    const PURPLE: [u8;3] = [0, 50, 30];
-    const OFF: [u8;3] = [0, 0, 0];
+    const PURPLE: [u8;9] = [0, 50, 30,0,0,0,0,0,0];
+    const OFF: [u8;9] = [0,0,0,0,0,0,0,0,0];
 
     let mut i: usize = 0;
     loop {
 
-        // Try to run at 60fps
-        let next_frame = Instant::now() + Duration::from_millis(16);
+        // Try ro run at 10fps
+        let next_frame = Instant::now() + Duration::from_millis(100);
 
         strip.set_node(i, OFF);
 
