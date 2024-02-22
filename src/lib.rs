@@ -61,4 +61,9 @@ impl<const N: usize, const M: usize, H: GenericHardware<N>> LEDs<N, M, H> {
     pub fn write(&mut self) -> Result<(), H::Error> {
         self.hw_dev.encode_and_write(&self.leds)
     }
+
+    pub fn clear(&mut self) -> Result<(), H::Error> {
+        self.leds = [0; N];
+        self.hw_dev.encode_and_write(&self.leds)
+    }
 }

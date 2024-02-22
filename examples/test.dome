@@ -1,0 +1,8 @@
+#id	R	G	B	Crc	Wrm	Net	Vrt	Hrz	Diag
+0	255	0	0	0	0	0	0	0	0
+1	0	255	0	0	0	0	0	0	0
+2	0	0	255	0	0	0	0	0	0
+show
+# Display LEDs for 1 second
+sleep	1000
+clear

@@ -5,22 +5,21 @@ use ws28xx_n_channel_spi::pi_spi::PiSPI;
 use ws28xx_n_channel_spi::LEDs;
 use std::time::{Duration, Instant};
 
-// 3 channels per module is a standard RGB setup
-const CHANNELS_PER_MODULE : usize = 9;
-// Number of modules
+// Number of nodes on the lightstage
 const NUM_MODULES : usize = 143;
-// Using 64 LEDs for an 8x8 grid as a demonstration
+// Lightstage has 9 LED channels per node
+const CHANNELS_PER_MODULE : usize = 9;
+
 const NUM_LEDS : usize = NUM_MODULES * CHANNELS_PER_MODULE;
 
-// Example that shows a single moving pixel though an RGB 8x8 led matrix.
+// Example to test every node on the UoY Lightstage
 fn main(){
     // Create the linux SPI device adapter
     let hw_adapter : PiSPI<NUM_LEDS> = PiSPI::new("/dev/spidev0.0").unwrap();
     // Create an LED strip with 
     let mut strip : LEDs<NUM_LEDS, CHANNELS_PER_MODULE, _> = LEDs::new(hw_adapter);
 
-    // Colour order is GRB for standard NeoPixels
-    const PURPLE: [u8;9] = [0, 50, 30,0,0,0,0,0,0];
+    const PURPLE: [u8;9] = [50,0,30,0,0,0,0,0,0];
     const OFF: [u8;9] = [0,0,0,0,0,0,0,0,0];
 
     let mut i: usize = 0;
