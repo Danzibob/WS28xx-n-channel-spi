@@ -57,7 +57,7 @@ where P: AsRef<Path>, {
 
                 let mut items = values.iter();
                 let mut leds: [u8; CHANNELS_PER_MODULE] = [0; CHANNELS_PER_MODULE];
-                for i in 0..8 {
+                for i in 0..CHANNELS_PER_MODULE {
                     if let Some(val) = items.next(){
                         leds[i] = val.parse::<u8>().expect("Invalid data item")
                     } else {panic!("Invalid value in data line")}
@@ -94,6 +94,7 @@ fn main() {
                 while Instant::now() < next_frame {}
             }
         }
+        println!("{:?}", command);
     }
 }
 
