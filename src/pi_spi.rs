@@ -57,6 +57,9 @@ pub const PI_SPI_HZ: u32 = 15_600_000;
 /// on WS28xx LED.
 pub const SPI_BYTES_PER_BIT: usize = 2;
 
+/// Number of SPI bytes for the 50us reset signal
+pub const SPI_BYTES_PER_RESET: usize = 100;
+
 /// See code comments above where this value comes from!
 ///
 /// These are the bits to send via SPI MOSI that represent a logical 0 on WS28xx RGB LED interface.
@@ -116,16 +119,16 @@ pub fn encode_node<const N: usize>(node: &Node<N>) -> [u8; N * SPI_BYTES_PER_PX]
 /// Wrapper around Spidev.
 pub struct PiSPI<const B: usize>
 where
-    [u8; B * SPI_BYTES_PER_BIT * BITS_PER_PX]:,
+    [u8; SPI_BYTES_PER_RESET + B * SPI_BYTES_PER_BIT * BITS_PER_PX]:,
 {
     spi: Spidev,
-    buffer: [u8; B * SPI_BYTES_PER_BIT * BITS_PER_PX],
+    buffer: [u8; SPI_BYTES_PER_RESET + B * SPI_BYTES_PER_BIT * BITS_PER_PX],
 }
 
 // Implement Hardware abstraction for device.
 impl<const B: usize> GenericHardware<B> for PiSPI<B>
 where
-    [u8; B * SPI_BYTES_PER_BIT * BITS_PER_PX]:,
+    [u8; SPI_BYTES_PER_RESET + B * SPI_BYTES_PER_BIT * BITS_PER_PX]:,
 {
     type Error = std::io::Error;
 
@@ -135,7 +138,7 @@ where
 
     fn encode_and_write(&mut self, node_data: &[u8]) -> Result<(), Self::Error> {
         for (i, byte) in node_data.iter().flat_map(encode_pixel).enumerate() {
-            self.buffer[i] = byte;
+            self.buffer[i + SPI_BYTES_PER_RESET] = byte;
         }
         self.spi.write_all(&self.buffer)
     }
@@ -143,7 +146,7 @@ where
 
 impl<const B: usize> PiSPI<B>
 where
-    [u8; B * SPI_BYTES_PER_BIT * BITS_PER_PX]:,
+    [u8; SPI_BYTES_PER_RESET + B * SPI_BYTES_PER_BIT * BITS_PER_PX]:,
 {
     /// Connects your application with the SPI-device of your device.
     ///
@@ -163,7 +166,7 @@ where
         spi.configure(&options)?;
         Ok(Self {
             spi,
-            buffer: [0; B * SPI_BYTES_PER_BIT * BITS_PER_PX],
+            buffer: [0; SPI_BYTES_PER_RESET + B * SPI_BYTES_PER_BIT * BITS_PER_PX],
         })
     }
 }
