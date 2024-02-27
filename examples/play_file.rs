@@ -77,7 +77,7 @@ fn main() {
     let commands = read_lines(filepath).expect("Failed to open file");
 
     // Create the linux SPI device adapter
-    let hw_adapter: PiSPI<NUM_LEDS> = PiSPI::new("/dev/spidev0.0")
+    let hw_adapter: PiSPI<NUM_LEDS> = PiSPI::new("/dev/spidev1.0")
                                     .expect("Failed to open SPI device");
     // Create an LED strip
     let mut strip: LEDs<NUM_LEDS, CHANNELS_PER_MODULE, PiSPI<NUM_LEDS>> = LEDs::new(hw_adapter);

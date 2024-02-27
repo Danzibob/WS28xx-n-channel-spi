@@ -15,7 +15,7 @@ const NUM_LEDS : usize = NUM_MODULES * CHANNELS_PER_MODULE;
 // Example to test every node on the UoY Lightstage
 fn main(){
     // Create the linux SPI device adapter
-    let hw_adapter : PiSPI<NUM_LEDS> = PiSPI::new("/dev/spidev0.0").unwrap();
+    let hw_adapter : PiSPI<NUM_LEDS> = PiSPI::new("/dev/spidev1.0").unwrap();
     // Create an LED strip with 
     let mut strip : LEDs<NUM_LEDS, CHANNELS_PER_MODULE, _> = LEDs::new(hw_adapter);
 
