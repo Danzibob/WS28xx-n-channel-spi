@@ -20,57 +20,59 @@ use spidev::{SpiModeFlags, Spidev, SpidevOptions};
 /// The frequency for the SPI device on the Raspberry Pi (Model 1).
 ///
 /// Works on other Linux systems with SPI device probably too if they have a similar frequency.
-pub const PI_SPI_HZ: u32 = 15_600_000;
+pub const PI_SPI_HZ: u32 = 20_000_000;
 // see https://web.archive.org/web/20140808235913/https://www.raspberrypi.org/documentation/hardware/raspberrypi/spi/README.md
 
-// this means 1 / 15_600_000 * 1E9 ns/cycle => 64ns / cycle => 15.6 MBit/s
+// this means 1 / 20_000_000 * 1E9 ns/cycle => 50ns / cycle
 //
 // See data sheet: https://cdn-shop.adafruit.com/datasheets/WS2812.pdf
 //
-// Timings of WS2818:
+// Timings of WS2811:
 //
-// pub const _T0H_NS: u64 = 350; // ±150ns tolerance
-// pub const _T0L_NS: u64 = 800; // ±150ns tolerance
-// pub const _T1H_NS: u64 = 700; // ±150ns tolerance
-// pub const _T1L_NS: u64 = 600; // ±150ns tolerance
+// pub const _T0H_NS: u64 = 250;  // ±75ns tolerance
+// pub const _T0L_NS: u64 = 1000; // ±75ns tolerance
+// pub const _T1H_NS: u64 = 600;  // ±75ns tolerance
+// pub const _T1L_NS: u64 = 650; // ±75ns tolerance
 // pub const _TRESET: u64 = 50_000; // >50 µs
 //
 // One Wire Protocol on WS2812 requires the
 // - "logical 0 Bit" to be:
-//   - T0H_NS ±150ns to be high
-//   - T0L_NS ±150ns to be low     (most of the time; at the end)
+//   - T0H_NS ±75ns to be high
+//   - T0L_NS ±75ns to be low     (most of the time; at the end)
 // - "logical 1 Bit" to be:
-//   - T1H_NS ±150ns to be high    (most of the time; at the beginning)
-//   - T1L_NS ±150ns to be low
+//   - T1H_NS ±75ns to be high    (most of the time; at the beginning)
+//   - T1L_NS ±75ns to be low
 //
-// T0H_NS = 350ns ± 150ns => 1_1111          ( 5 bits * 64ns per bit ~ 320ns)
-// T0L_NS = 800ns ± 150ns => 000_0000_0000   (11 bits * 64ns per bit ~ 704ns)
+// T0H_NS = 250ns  ± 150ns => 11111          ( 5 bits * 50ns per bit ~ 250ns)
+// T0L_NS = 1000ns ± 150ns => 000_0000_0000_0000_0000   (19 bits * 50ns per bit ~ 950ns)
+// 0 -> 1111_1000_0000_0000_0000_0000 (24 bits, 3 bytes, 1200ns)
 //
-// T1H_NS = 700ns ± 150ns => 1_1111_1111    (9 bits * 64ns per bit ~ 576ns)
-// T1L_NS = 600ns ± 150ns => 000_0000        (7 bits * 64ns per bit ~ 448ns)
+// T1H_NS = 700ns ± 150ns => 1_1111_1111_1111    (13 bits * 50ns per bit ~ 650ns)
+// T1L_NS = 600ns ± 150ns => 000_0000_0000        (11 bits * 50ns per bit ~ 550ns)
+// 1 -> 1111_1111_1111_1000_0000_0000 (24 bits, 3 bytes, 1200ns)
 //
-// => !! we encode one data bit in two SPI byte for the proper timings !!
+// => !! we encode one data bit in three SPI bytes for the proper timings !!
 
 /// How many SPI bytes must be sent for a single data bit.
 ///
 /// This number of bytes result in one logical zero or one
 /// on WS28xx LED.
-pub const SPI_BYTES_PER_BIT: usize = 2;
+pub const SPI_BYTES_PER_BIT: usize = 3;
 
 /// Number of SPI bytes for the 50us reset signal
-pub const SPI_BYTES_PER_RESET: usize = 100;
+pub const SPI_BYTES_PER_RESET: usize = 1000;
 
 /// See code comments above where this value comes from!
 ///
-/// These are the bits to send via SPI MOSI that represent a logical 0 on WS28xx RGB LED interface.
+/// These are the bits to send via SPI MOSI that represent a logical 0 on WS2811 RGB LED interface.
 /// Frequency + length results in the proper timings.
-pub const WS_ZERO_BYTES: [u8; SPI_BYTES_PER_BIT] = [0b1111_1000, 0b0000_0000];
+pub const WS_ZERO_BYTES: [u8; SPI_BYTES_PER_BIT] = [0b1111_1000, 0b0000_0000, 0b0000_0000];
 
 /// See code comments above where this value comes from!
 ///
-/// These are the bits to send via SPI MOSI that represent a logical 1 on WS28xx RGB LED interface.
+/// These are the bits to send via SPI MOSI that represent a logical 1 on WS2811 RGB LED interface.
 /// Frequency + length results in the proper timings.
-pub const WS_ONE_BYTES: [u8; SPI_BYTES_PER_BIT] = [0b1111_1111, 0b1000_0000];
+pub const WS_ONE_BYTES: [u8; SPI_BYTES_PER_BIT] = [0b1111_1111, 0b1111_1000, 0b0000_0000];
 
 /// Number of bits per pixel; should not be changed.
 pub const BITS_PER_PX: usize = 8; // should always be 8, but left as a constant for easy editing
@@ -90,11 +92,9 @@ pub fn encode_pixel(pixel: &u8) -> [u8; SPI_BYTES_PER_PX] {
     for px_bit_idx in 0..(BITS_PER_PX) {
         let bit = (pixel >> (BITS_PER_PX - px_bit_idx - 1)) & 1;
         // Select the correct SPI bytes and set them in the output
-        let spi_data = if bit == 1 {
-            WS_ONE_BYTES
-        } else {
-            WS_ZERO_BYTES
-        };
+        let spi_data = if bit == 1 { WS_ONE_BYTES  } 
+                       else        { WS_ZERO_BYTES };
+
         for byte in 0..SPI_BYTES_PER_BIT {
             encoded[px_bit_idx * 2 + byte] = spi_data[byte];
         }
@@ -122,7 +122,7 @@ where
     [u8; SPI_BYTES_PER_RESET + B * SPI_BYTES_PER_BIT * BITS_PER_PX]:,
 {
     spi: Spidev,
-    buffer: [u8; SPI_BYTES_PER_RESET + B * SPI_BYTES_PER_BIT * BITS_PER_PX],
+    pub buffer: [u8; SPI_BYTES_PER_RESET + B * SPI_BYTES_PER_BIT * BITS_PER_PX],
 }
 
 // Implement Hardware abstraction for device.
