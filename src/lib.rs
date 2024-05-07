@@ -15,6 +15,8 @@
 extern crate std;
 #[cfg(feature = "adapter_spidev")]
 pub mod pi_spi; // specific [std]-implementation
+#[cfg(feature = "rpi_ws281x")]
+pub mod rpi_ws281x;
 
 /// Hardware device abstraction, which can be implemented by many different types of back-end (embedded, linux, etc.)
 pub trait GenericHardware<const B: usize> {

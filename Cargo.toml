@@ -4,7 +4,7 @@ description = "Simple, stripped down, educational, no_std-compatible driver for 
 version = "2.0.0"
 authors = [
     "Philipp Schuster <phip1611@gmail.com>",
-    "Danny Roberts <danny.roberts@york.ac.uk>"
+    "Danny Roberts <danny.roberts@york.ac.uk>",
 ]
 edition = "2018"
 keywords = ["spi", "ws2811", "ws2812", "ws2818", "neopixel"]
@@ -17,8 +17,10 @@ repository = "https://github.com/Danzibob/WS28xx-n-channel-spi/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["adapter_spidev"]
+default = ["rpi_ws281x", "adapter_spidev"]
 adapter_spidev = ["spidev"]
+rpi_ws281x = ["rs_ws281x"]
 
 [dependencies]
+rs_ws281x = { version = "0.5.1", optional = true }
 spidev = { version = "0.4.1", optional = true }
