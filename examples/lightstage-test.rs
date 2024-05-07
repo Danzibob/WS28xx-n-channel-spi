@@ -17,11 +17,11 @@ const NUM_LEDS: usize = NUM_MODULES * CHANNELS_PER_MODULE;
 fn main() {
     // Create the linux SPI device adapter
     // let hw_adapter : PiSPI<NUM_LEDS> = PiSPI::new("/dev/spidev1.0").unwrap();
-    let hw_adapter = rpi_ws281x::setup::<9>(100, 50).unwrap();
+    let hw_adapter = rpi_ws281x::setup::<CHANNELS_PER_MODULE>(NUM_MODULES, 50).unwrap();
     // Create an LED strip with
     let mut strip: LEDs<NUM_LEDS, CHANNELS_PER_MODULE, _> = LEDs::new(hw_adapter);
 
-    const PURPLE: [u8; 9] = [50, 0, 30, 0, 0, 0, 0, 0, 0];
+    const PURPLE: [u8; 9] = [240, 60, 120, 200, 200, 200, 200, 200, 200];
     const OFF: [u8; 9] = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     let mut i: usize = 0;
